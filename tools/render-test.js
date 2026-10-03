@@ -210,6 +210,21 @@ function text(dom, sel) {
   ok("基础：首页有 OG 标签", !!hd.querySelector('meta[property="og:title"]'));
   ok("基础：详情页有 OG 标签", !!d2.querySelector('meta[property="og:title"]'));
 
+  /* ---------------------------------------------------------- 内容自洽性 */
+  /* 这些是曾经写过、但没有实际执行记录的数据。一旦再出现，说明又在编过程。 */
+  const BANNED = [
+    "92 秒", "200 多张", "14 个分镜", "24 个分镜", "8 倍", "40 分钟",
+    "30 张", "12 条", "0.45", "三成", "六成", "6 小时", "4 天",
+  ];
+  for (const cid of ["nocturne", "beasts", "pipeline"]) {
+    const p = await load("case.html", "?id=" + cid);
+    const t = p.window.document.body.textContent;
+    const hit = BANNED.filter((b) => t.indexOf(b) > -1);
+    ok("自洽：" + cid + " 无未证实数据", hit.length === 0, "命中 " + hit.join("、"));
+  }
+  ok("自洽：首页无未证实数据",
+    BANNED.filter((b) => hd.body.textContent.indexOf(b) > -1).length === 0);
+
   /* ---------------------------------------------------------- 资源完整性 */
   const dataSrc = fs.readFileSync(path.join(ROOT, "assets/js/data.js"), "utf8");
   const refs = Array.from(dataSrc.matchAll(/assets\/media\/[A-Za-z0-9._-]+/g)).map((m) => m[0]);
